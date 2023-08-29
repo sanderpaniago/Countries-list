@@ -15,6 +15,8 @@ type CountryItem = {
   capital: string[]
   region: string
   population: number
+  cioc: string
+  cca3: string
 }
 
 type Props = {
@@ -24,9 +26,11 @@ type Props = {
   }
 }
 
-async function getData({q, sort}: Props['searchParams']) {
-  const {data} = await api.get('/all', {params: {fields: 'capital,region,flags,population,name'}})
-  
+async function getData({ q, sort }: Props['searchParams']) {
+  const { data } = await api.get('/all', {
+    params: { fields: 'capital,region,flags,population,name,cioc,cca3' }
+  })
+
   if (!data) {
     throw new Error('Failed to fetch data')
   }
@@ -37,35 +41,44 @@ async function getData({q, sort}: Props['searchParams']) {
   })) as CountryItem[]
 
   if (q) {
-    country = country.filter(item => item.name.toLowerCase().includes(q.toLowerCase()))
+    country = country.filter((item) =>
+      item.name.toLowerCase().includes(q.toLowerCase())
+    )
   }
 
   if (sort) {
-    country = country.filter(item => item.region === sort)
+    country = country.filter((item) => item.region === sort)
   }
 
   return country.sort((a, b) => a.name.localeCompare(b.name))
 }
 
-export default async function Home({searchParams}: Props) {
-  console.log(searchParams)
+export default async function Home({ searchParams }: Props) {
   const data = await getData(searchParams)
   return (
     <main className="pb-6">
       <Header />
 
-      <section className='mt-4 flex flex-col md:justify-between md:flex-row w-full max-w-[1440px] px-4 gap-4 mx-auto'>
+      <section className="mt-4 flex flex-col md:justify-between md:flex-row w-full max-w-[1440px] px-4 gap-4 mx-auto">
         <SearchInput />
 
         <SortBy />
       </section>
 
-      <ul className='mx-auto w-full flex flex-col items-center md:grid md:grid-cols-grid-cards md:justify-between mt-10 gap-6 max-w-[1440px] px-4'>
-        {data.map(item => (
-          <li key={item.name} className='w-fit'>
-            <Card capital={item.capital[0]} imageUrl={item.flags.svg} imageAlt={item.flags.alt} name={item.name} population={item.population} region={item.region} />
-        </li>
-          ))}
+      <ul className="mx-auto w-full flex flex-col items-center md:grid md:grid-cols-grid-cards md:justify-between mt-10 gap-6 max-w-[1440px] px-4">
+        {data.map((item) => (
+          <li key={item.name} className="w-fit">
+            <Card
+              capital={item.capital[0]}
+              imageUrl={item.flags.svg}
+              imageAlt={item.flags.alt}
+              name={item.name}
+              population={item.population}
+              region={item.region}
+              code={item?.cca3 ?? item?.cioc}
+            />
+          </li>
+        ))}
       </ul>
     </main>
   )
