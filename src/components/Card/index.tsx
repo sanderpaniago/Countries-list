@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-type Props = {
+export type Props = {
   imageUrl: string
   imageAlt: string
   name: string
